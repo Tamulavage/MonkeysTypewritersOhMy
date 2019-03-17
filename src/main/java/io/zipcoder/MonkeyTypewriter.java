@@ -1,5 +1,7 @@
 package io.zipcoder;
 
+import java.util.concurrent.locks.ReentrantLock;
+
 public class MonkeyTypewriter {
     public static void main(String[] args) {
         String introduction = "It was the best of times,\n" +
@@ -25,14 +27,36 @@ public class MonkeyTypewriter {
         // A Tale Of Two Cities.
 
 
+        ReentrantLock lock = new ReentrantLock();
+        SafeCopier safeCopier = new SafeCopier(introduction, lock);
+        UnsafeCopier unsafeCopier = new UnsafeCopier(introduction);
+
+        Integer threadCount = 55;
+        Thread[] unSafe= new Thread[threadCount];
+        Thread[] safe= new Thread[threadCount];
+
+        for(int i = 0; i < threadCount ; i++){
+            unSafe[i] = new Thread(unsafeCopier);
+            safe[i] = new Thread(safeCopier);
+        }
+        for(int j=0; j< threadCount; j++){
+            unSafe[j].start();
+            safe[j].start();
+        }
+
+
+
         // This wait is here because main is still a thread and we want the main method to print the finished copies
         // after enough time has passed.
         try {
-            Thread.sleep(1000);
+            Thread.sleep(100000);
         } catch(InterruptedException e) {
             System.out.println("MAIN INTERRUPTED");
         }
 
         // Print out the copied versions here.
+        System.out.println(unsafeCopier.copied);
+        System.out.println("--------");
+        System.out.println(safeCopier.copied);
     }
 }
